@@ -9,7 +9,7 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - **Stack**: Plain HTML/CSS/JS, no build step/framework.
 - **Storage**: Firestore (multi-device sync needed).
 - **Auth**: Google Sign-In (Firebase Auth) so diary data is scoped to the user's Google account across devices.
-- **Hosting**: Firebase Hosting.
+- **Hosting**: Firebase Hosting using its default `*.web.app` URL; no custom domain registration is needed.
 - **Firebase project**: does not exist yet — walk through creating it in the Firebase Console.
 - **Graph library**: Chart.js (via CDN), toggle between Weight and Calories line graphs.
 - **Layout**: mobile-first single layout (no separate desktop/mobile styling).
@@ -43,7 +43,7 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - [ ] Enable Firestore (production mode)
 - [ ] Enable Google sign-in provider in Authentication
 - [ ] Register a Web App to get the config snippet
-- [ ] Enable Firebase Hosting
+- [ ] Enable Firebase Hosting (use the default `*.web.app` URL)
 - [ ] Save the Firebase config into `js/firebase-config.js`
 
 ### Phase 1 — Project scaffold (depends on Phase 0)
