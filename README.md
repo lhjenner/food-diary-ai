@@ -41,11 +41,11 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 ## Implementation plan
 
 ### Phase 0 — Firebase project setup (manual, guided)
-- [ ] Create Firebase project in the console
-- [ ] Enable Firestore (production mode)
-- [ ] Enable Google sign-in provider in Authentication
-- [ ] Register a Web App to get the config snippet
-- [ ] Enable Firebase Hosting (use the default `*.web.app` URL)
+- [x] Create Firebase project in the console (`food-diary-built-with-ai`)
+- [x] Enable Firestore (production mode)
+- [x] Enable Google sign-in provider in Authentication
+- [x] Register a Web App to get the config snippet
+- [x] Enable Firebase Hosting (use the default `*.web.app` URL); `firebase init` (Firestore + Hosting) run, generating `.firebaserc`, `firebase.json`, `firestore.rules`, `firestore.indexes.json`, `index.html`, `404.html`
 - [ ] Save the Firebase config into `js/firebase-config.js`
 
 ### Phase 1 — Project scaffold (depends on Phase 0)
