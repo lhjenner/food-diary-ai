@@ -320,9 +320,11 @@ function getMealFromForm() {
     .map((row) => {
       const item = row.querySelector("input[name='item']").value.trim();
       const calorieInput = row.querySelector("input[name='calories']").value;
-      const calories = calorieInput === "" ? undefined : Number(calorieInput);
-
-      return { item, calories };
+      const mealRow = { item };
+      if (calorieInput !== "") {
+        mealRow.calories = Number(calorieInput);
+      }
+      return mealRow;
     })
     .filter((row) => row.item);
 
@@ -330,7 +332,7 @@ function getMealFromForm() {
     return null;
   }
 
-  if (rows.some((row) => !Number.isFinite(row.calories) && row.calories !== undefined)) {
+  if (rows.some((row) => row.calories !== undefined && !Number.isFinite(row.calories))) {
     return "Calories must be a valid number.";
   }
 
