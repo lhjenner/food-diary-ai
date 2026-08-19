@@ -238,6 +238,27 @@ h3 {
   padding-left: 20px;
 }
 
+.meal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.text-button {
+  border: 0;
+  color: #365d49;
+  background: transparent;
+  cursor: pointer;
+  font-family: "Trebuchet MS", sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 4px 0;
+}
+
+.text-button-danger {
+  color: #9a2e2e;
+}
+
 .empty-state {
   margin: 18px 0 0;
   color: #536159;
@@ -354,6 +375,92 @@ h3 {
   line-height: 1.5;
 }
 
+.entry-dialog {
+  width: min(100% - 32px, 620px);
+  max-height: min(100% - 32px, 760px);
+  border: 1px solid #d9d4c6;
+  border-radius: 8px;
+  color: #24322b;
+  background: #fffdf8;
+  box-shadow: 0 18px 44px rgba(43, 57, 48, 0.22);
+  padding: 0;
+}
+
+.entry-dialog::backdrop {
+  background: rgba(30, 46, 39, 0.5);
+}
+
+.entry-form {
+  padding: 24px;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.entry-rows {
+  display: grid;
+  gap: 14px;
+}
+
+.entry-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 132px 32px;
+  align-items: end;
+  gap: 10px;
+  padding-right: 42px;
+}
+
+.entry-row-first {
+  grid-template-columns: 112px minmax(0, 1fr) 132px;
+  padding-right: 0;
+}
+
+.entry-field {
+  display: grid;
+  gap: 5px;
+  color: #536159;
+  font-family: "Trebuchet MS", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.entry-field input {
+  min-width: 0;
+}
+
+.remove-row-button {
+  top: auto;
+  right: 0;
+  bottom: 6px;
+  font-size: 1.2rem;
+}
+
+.add-row-button {
+  margin-top: 16px;
+}
+
+.form-error {
+  margin: 14px 0 0;
+  color: #9a2e2e;
+  font-family: "Trebuchet MS", sans-serif;
+  font-weight: 700;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: end;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #d9d4c6;
+}
+
 @media (max-width: 480px) {
   .page-shell {
     width: min(100% - 24px, 640px);
@@ -385,5 +492,34 @@ h3 {
 
   .average-list {
     grid-template-columns: 1fr;
+  }
+
+  .entry-dialog {
+    width: 100%;
+    max-height: 100%;
+    min-height: 100%;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .entry-form {
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  .entry-row,
+  .entry-row-first {
+    grid-template-columns: minmax(0, 1fr) 112px;
+    padding-right: 0;
+  }
+
+  .entry-row-first .entry-field:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .remove-row-button {
+    position: static;
+    align-self: end;
+    grid-column: 2;
   }
 }

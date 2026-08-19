@@ -63,13 +63,13 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - [x] "Copy Day as JSON" button with an adjacent "Include calories" toggle near the running calorie total; copying and preference persistence arrive in Phase 4
 
 ### Phase 3 — Add/Edit Entry modal (depends on Phase 2)
-- [ ] Row-based form: each row = time, item, calories (time/calories optional)
-- [ ] First row sets the time; "+" button adds more rows that reuse that time, only needing item + calories
-- [ ] Save validates minimal input and closes the modal
-- [ ] On save (new entry): append meal object `{ time, rows }` to the day's `meals` array, persist, re-render
-- [ ] Reuse the modal for editing: "Edit" icon on each meal card opens it pre-filled; Save updates in place
-- [ ] "Delete" icon/button on each meal card (with confirmation) removes it and persists
-- [ ] Weight field gets a "Clear" (X) control to delete a saved value for the day
+- [x] Row-based form: each row = time, item, calories (time/calories optional)
+- [x] First row sets the time; "Add another item" adds more rows that reuse that time, only needing item + calories
+- [x] Save validates minimal input and closes the modal
+- [x] On save (new entry): append meal object `{ time, rows }` to the selected day's in-memory `meals` array and re-render; Firestore persistence is Phase 4
+- [x] Reuse the modal for editing: "Edit" control on each meal card opens it pre-filled; Save updates in place
+- [x] "Delete" control on each meal card (with confirmation) removes it from in-memory state and re-renders; Firestore persistence is Phase 4
+- [x] Weight field gets a "Clear" (X) control to delete a locally retained value for the day; Firestore persistence is Phase 4
 
 ### Phase 4 — Persistence wiring (depends on Phases 1-3)
 - [ ] `firestore.js`: `getDay(uid, dateStr)`, `saveDay(uid, dateStr, dayData)`
