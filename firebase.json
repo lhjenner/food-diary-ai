@@ -9,6 +9,9 @@
     "public": ".",
     "ignore": [
       "firebase.json",
+      "README.md",
+      "firestore.rules",
+      "firestore.indexes.json",
       "**/.*",
       "**/node_modules/**"
     ]

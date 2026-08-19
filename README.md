@@ -91,9 +91,9 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - [x] Simple responsive CSS in `css/style.css`, no framework needed
 
 ### Phase 7 — Deploy (depends on all previous phases)
-- [ ] `firebase init hosting` (or manual `firebase.json`)
-- [ ] `firebase deploy` and verify the live URL on desktop and phone
-- [ ] Deploy Firestore security rules (`firebase deploy --only firestore:rules`)
+- [x] `firebase init hosting` (or manual `firebase.json`)
+- [x] `firebase deploy` published https://food-diary-built-with-ai.web.app and the live sign-in page responds; manual phone verification remains in the verification checklist
+- [x] Deploy Firestore security rules (`firebase deploy --only firestore:rules`)
 
 ## Relevant files (to be created)
 
