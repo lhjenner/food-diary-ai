@@ -23,10 +23,19 @@ const emptyState = document.querySelector("#empty-state");
 const copyButton = document.querySelector("#copy-button");
 const includeCaloriesToggle = document.querySelector("#include-calories-toggle");
 const addEntryButton = document.querySelector("#add-entry-button");
+const entryDialog = document.querySelector("#entry-dialog");
+const entryForm = document.querySelector("#entry-form");
+const entryDialogTitle = document.querySelector("#entry-dialog-title");
+const entryRows = document.querySelector("#entry-rows");
+const addRowButton = document.querySelector("#add-row-button");
+const closeEntryDialogButton = document.querySelector("#close-entry-dialog");
+const cancelEntryButton = document.querySelector("#cancel-entry-button");
+const entryFormError = document.querySelector("#entry-form-error");
 
 const state = {
   currentDate: getTodayDate(),
-  days: {}
+  days: {},
+  editingMealIndex: null
 };
 
 function getTodayDate() {
@@ -95,6 +104,9 @@ function renderMeals(meals) {
     const heading = document.createElement("h3");
     const time = document.createElement("p");
     const rows = document.createElement("ul");
+    const actions = document.createElement("div");
+    const editButton = document.createElement("button");
+    const deleteButton = document.createElement("button");
 
     card.className = "meal-card";
     heading.textContent = `Meal ${index + 1}`;
@@ -104,14 +116,149 @@ function renderMeals(meals) {
 
     meal.rows.forEach((row) => {
       const item = document.createElement("li");
-      const calories = Number.isFinite(Number(row.calories)) ? ` ${row.calories} cal` : "";
+      const calories = row.calories !== undefined ? ` ${row.calories} cal` : "";
       item.textContent = `${row.item}${calories}`;
       rows.append(item);
     });
 
-    card.append(heading, time, rows);
+    actions.className = "meal-actions";
+    editButton.className = "text-button";
+    editButton.type = "button";
+    editButton.textContent = "Edit";
+    editButton.addEventListener("click", () => openEntryDialog(index));
+    deleteButton.className = "text-button text-button-danger";
+    deleteButton.type = "button";
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", () => deleteMeal(index));
+    actions.append(editButton, deleteButton);
+
+    card.append(heading, time, rows, actions);
     mealList.append(card);
   });
+}
+
+function addEntryRow(row = {}, isFirstRow = false) {
+  const rowElement = document.createElement("div");
+  const itemLabel = document.createElement("label");
+  const itemInput = document.createElement("input");
+  const caloriesLabel = document.createElement("label");
+  const caloriesInput = document.createElement("input");
+  let removeRowButton;
+
+  rowElement.className = "entry-row";
+  itemLabel.className = "entry-field";
+  itemLabel.textContent = "Item";
+  itemInput.name = "item";
+  itemInput.type = "text";
+  itemInput.autocomplete = "off";
+  itemInput.placeholder = "e.g. Oatmeal";
+  itemInput.value = row.item ?? "";
+  itemLabel.append(itemInput);
+
+  caloriesLabel.className = "entry-field";
+  caloriesLabel.textContent = "Calories";
+  caloriesInput.name = "calories";
+  caloriesInput.type = "number";
+  caloriesInput.inputMode = "numeric";
+  caloriesInput.min = "0";
+  caloriesInput.step = "1";
+  caloriesInput.placeholder = "Optional";
+  caloriesInput.value = row.calories ?? "";
+  caloriesLabel.append(caloriesInput);
+
+  if (isFirstRow) {
+    const timeLabel = document.createElement("label");
+    const timeInput = document.createElement("input");
+
+    rowElement.classList.add("entry-row-first");
+    timeLabel.className = "entry-field";
+    timeLabel.textContent = "Time";
+    timeInput.name = "time";
+    timeInput.type = "time";
+    timeInput.value = row.time ?? "";
+    timeLabel.append(timeInput);
+    rowElement.append(timeLabel);
+  } else {
+    removeRowButton = document.createElement("button");
+    removeRowButton.className = "icon-button remove-row-button";
+    removeRowButton.type = "button";
+    removeRowButton.setAttribute("aria-label", "Remove item");
+    removeRowButton.title = "Remove item";
+    removeRowButton.textContent = "-";
+    removeRowButton.addEventListener("click", () => rowElement.remove());
+  }
+
+  rowElement.append(itemLabel, caloriesLabel);
+  if (removeRowButton) {
+    rowElement.append(removeRowButton);
+  }
+  entryRows.append(rowElement);
+  return itemInput;
+}
+
+function setEntryFormError(message = "") {
+  entryFormError.textContent = message;
+  entryFormError.hidden = !message;
+}
+
+function openEntryDialog(mealIndex = null) {
+  const meal = mealIndex === null ? null : getDay(state.currentDate).meals[mealIndex];
+
+  state.editingMealIndex = mealIndex;
+  entryDialogTitle.textContent = meal ? "Edit entry" : "Add entry";
+  entryRows.replaceChildren();
+  setEntryFormError();
+  addEntryRow({ time: meal?.time, ...meal?.rows[0] }, true);
+
+  meal?.rows.slice(1).forEach((row) => addEntryRow(row));
+  entryDialog.showModal();
+  entryRows.querySelector("input[name='item']").focus();
+}
+
+function closeEntryDialog() {
+  entryDialog.close();
+  state.editingMealIndex = null;
+}
+
+function getMealFromForm() {
+  const firstRow = entryRows.firstElementChild;
+  const time = firstRow.querySelector("input[name='time']").value;
+  const rows = [...entryRows.querySelectorAll(".entry-row")]
+    .map((row) => {
+      const item = row.querySelector("input[name='item']").value.trim();
+      const calorieInput = row.querySelector("input[name='calories']").value;
+      const calories = calorieInput === "" ? undefined : Number(calorieInput);
+
+      return { item, calories };
+    })
+    .filter((row) => row.item);
+
+  if (!rows.length) {
+    return null;
+  }
+
+  if (rows.some((row) => !Number.isFinite(row.calories) && row.calories !== undefined)) {
+    return "Calories must be a valid number.";
+  }
+
+  if (rows.some((row) => row.calories !== undefined && row.calories < 0)) {
+    return "Calories cannot be negative.";
+  }
+
+  return {
+    time,
+    rows
+  };
+}
+
+function deleteMeal(mealIndex) {
+  if (!window.confirm("Delete this entry?")) {
+    return;
+  }
+
+  getDay(state.currentDate).meals.splice(mealIndex, 1);
+  renderDay();
+  setStatus("Entry deleted.");
 }
 
 function renderDay() {
@@ -202,7 +349,7 @@ clearWeightButton.addEventListener("click", () => {
 });
 
 copyButton.addEventListener("click", () => {
-  setStatus("Copying entries is available once entry creation is added.");
+  setStatus("Copying entries is available in the next phase.");
 });
 
 includeCaloriesToggle.addEventListener("change", () => {
@@ -210,5 +357,44 @@ includeCaloriesToggle.addEventListener("change", () => {
 });
 
 addEntryButton.addEventListener("click", () => {
-  setStatus("Entry creation is the next step in the diary.");
+  openEntryDialog();
+});
+
+addRowButton.addEventListener("click", () => {
+  addEntryRow();
+  entryRows.lastElementChild.querySelector("input[name='item']").focus();
+});
+
+closeEntryDialogButton.addEventListener("click", closeEntryDialog);
+cancelEntryButton.addEventListener("click", closeEntryDialog);
+
+entryDialog.addEventListener("close", () => {
+  state.editingMealIndex = null;
+});
+
+entryForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const meal = getMealFromForm();
+
+  if (meal === null) {
+    setEntryFormError("Add at least one item before saving.");
+    return;
+  }
+
+  if (typeof meal === "string") {
+    setEntryFormError(meal);
+    return;
+  }
+
+  const meals = getDay(state.currentDate).meals;
+  if (state.editingMealIndex === null) {
+    meals.push(meal);
+    setStatus("Entry added.");
+  } else {
+    meals[state.editingMealIndex] = meal;
+    setStatus("Entry updated.");
+  }
+
+  closeEntryDialog();
+  renderDay();
 });
