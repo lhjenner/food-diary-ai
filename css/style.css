@@ -55,8 +55,16 @@ h1 {
 }
 
 .intro,
-.coming-soon,
-.signed-in-as {
+.signed-in-as,
+.date-control,
+.weight-input-row,
+.average-list,
+.calorie-total,
+.empty-state,
+.copy-controls,
+.toggle-control,
+.meal-time,
+.meal-rows {
   font-family: "Trebuchet MS", sans-serif;
   line-height: 1.6;
 }
@@ -79,11 +87,224 @@ h1 {
   color: #536159;
 }
 
-.coming-soon {
-  margin: 42px 0 0;
-  padding-top: 20px;
-  border-top: 1px solid #d9d4c6;
+.date-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 32px 0;
   color: #536159;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+input[type="date"],
+input[type="number"] {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #b9c1ae;
+  border-radius: 6px;
+  color: #24322b;
+  background: #fffdf8;
+  font: inherit;
+  padding: 9px 12px;
+}
+
+input[type="date"] {
+  width: auto;
+}
+
+input:focus-visible {
+  outline: 3px solid #efb35c;
+  outline-offset: 2px;
+}
+
+.weight-section,
+.meal-section {
+  padding: 24px 0;
+  border-top: 1px solid #d9d4c6;
+}
+
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.section-heading .eyebrow {
+  margin-bottom: 5px;
+}
+
+h2,
+h3 {
+  margin: 0;
+  color: #1e2e27;
+}
+
+h2 {
+  font-size: 1.4rem;
+}
+
+h3 {
+  font-size: 1rem;
+}
+
+.weight-unit,
+.calorie-total {
+  margin: 0;
+  color: #5a6e57;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.weight-input-row {
+  position: relative;
+  margin-top: 18px;
+}
+
+.weight-input-row input {
+  padding-right: 48px;
+}
+
+.icon-button {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  color: #365d49;
+  background: #edf0e7;
+  cursor: pointer;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.average-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0 0;
+}
+
+.average-list div {
+  min-width: 0;
+  padding: 12px;
+  border-left: 3px solid #9fad9a;
+  background: #f3f3ea;
+}
+
+.average-list dt {
+  color: #536159;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.average-list dd {
+  margin: 4px 0 0;
+  color: #1e2e27;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.meal-section {
+  padding-bottom: 16px;
+}
+
+.meal-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.meal-card {
+  border: 1px solid #d9d4c6;
+  border-radius: 6px;
+  padding: 14px;
+}
+
+.meal-time {
+  margin: 3px 0 8px;
+  color: #536159;
+  font-size: 0.85rem;
+}
+
+.meal-rows {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.empty-state {
+  margin: 18px 0 0;
+  color: #536159;
+}
+
+.copy-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0 28px;
+}
+
+.toggle-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #536159;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.toggle-control input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.toggle-track {
+  position: relative;
+  width: 38px;
+  height: 22px;
+  border-radius: 11px;
+  background: #9fad9a;
+  transition: background 160ms ease;
+}
+
+.toggle-track::after {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fffdf8;
+  content: "";
+  transition: transform 160ms ease;
+}
+
+.toggle-control input:checked + .toggle-track {
+  background: #365d49;
+}
+
+.toggle-control input:checked + .toggle-track::after {
+  transform: translateX(16px);
+}
+
+.toggle-control input:focus-visible + .toggle-track {
+  outline: 3px solid #efb35c;
+  outline-offset: 3px;
+}
+
+.add-entry-button {
+  width: 100%;
 }
 
 .button {
@@ -151,5 +372,18 @@ h1 {
 
   .button-secondary {
     align-self: start;
+  }
+
+  .date-control {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  input[type="date"] {
+    width: 100%;
+  }
+
+  .average-list {
+    grid-template-columns: 1fr;
   }
 }
