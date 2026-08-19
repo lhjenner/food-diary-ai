@@ -163,7 +163,7 @@ function getRollingAverage(endDateString) {
 }
 
 function formatAverage(value) {
-  return value === null ? "--" : `${value.toFixed(1)} lb`;
+  return value === null ? "--" : `${value.toFixed(1)} kg`;
 }
 
 function formatDateHeading(dateString) {
@@ -414,7 +414,7 @@ function renderHistoryChart() {
     return;
   }
 
-  const label = isWeightMode ? "Weight (lb)" : "Calories";
+  const label = isWeightMode ? "Weight (kg)" : "Calories";
   const color = isWeightMode ? "#365d49" : "#c46231";
   state.graphChart = new window.Chart(historyChartCanvas, {
     type: "line",
