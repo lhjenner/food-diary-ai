@@ -3,7 +3,15 @@ import {
   signInWithPopup,
   signOut
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { auth, googleProvider } from "./firestore.js";
+import {
+  auth,
+  getDay as getStoredDay,
+  getSettings,
+  getWeightsForDateRange,
+  googleProvider,
+  saveDay,
+  saveSettings
+} from "./firestore.js";
 
 const signedOutView = document.querySelector("#signed-out-view");
 const signedInView = document.querySelector("#signed-in-view");
@@ -35,7 +43,9 @@ const entryFormError = document.querySelector("#entry-form-error");
 const state = {
   currentDate: getTodayDate(),
   days: {},
-  editingMealIndex: null
+  editingMealIndex: null,
+  includeCaloriesInCopy: true,
+  userId: null
 };
 
 function getTodayDate() {
@@ -57,6 +67,69 @@ function getDay(dateString) {
   }
 
   return state.days[dateString];
+}
+
+function normalizeDay(day = {}) {
+  const meals = Array.isArray(day.meals) ? day.meals : [];
+  const normalizedDay = { meals };
+
+  if (Number.isFinite(day.weight)) {
+    normalizedDay.weight = day.weight;
+  }
+
+  return normalizedDay;
+}
+
+async function loadDay(dateString) {
+  const uid = state.userId;
+  if (!uid) {
+    return;
+  }
+
+  const averageStartDate = getDateOffset(dateString, -7);
+
+  try {
+    const [storedDay, weights] = await Promise.all([
+      getStoredDay(uid, dateString),
+      getWeightsForDateRange(uid, averageStartDate, dateString)
+    ]);
+
+    if (state.userId !== uid || state.currentDate !== dateString) {
+      return;
+    }
+
+    state.days[dateString] = normalizeDay(storedDay);
+    Object.entries(weights).forEach(([date, weight]) => {
+      getDay(date).weight = weight;
+    });
+    renderDay();
+  } catch (error) {
+    console.error("Could not load diary data.", error);
+    setStatus("Your diary could not be loaded. Please try again.");
+    renderDay();
+  }
+}
+
+async function saveCurrentDay(successMessage = "") {
+  const uid = state.userId;
+  if (!uid) {
+    return false;
+  }
+
+  const dateString = state.currentDate;
+  const day = getDay(dateString);
+
+  try {
+    await saveDay(uid, dateString, day);
+    if (state.userId === uid && state.currentDate === dateString && successMessage) {
+      setStatus(successMessage);
+    }
+    return true;
+  } catch (error) {
+    console.error("Could not save diary data.", error);
+    setStatus("Your change could not be saved. Please try again.");
+    return false;
+  }
 }
 
 function getRollingAverage(endDateString) {
@@ -258,7 +331,7 @@ function deleteMeal(mealIndex) {
 
   getDay(state.currentDate).meals.splice(mealIndex, 1);
   renderDay();
-  setStatus("Entry deleted.");
+  saveCurrentDay("Entry deleted.");
 }
 
 function renderDay() {
@@ -274,6 +347,7 @@ function renderDay() {
   previousAverage.textContent = formatAverage(getRollingAverage(getDateOffset(state.currentDate, -1)));
   calorieTotal.textContent = getCalories(meals).toLocaleString();
   copyButton.disabled = meals.length === 0;
+  includeCaloriesToggle.checked = state.includeCaloriesInCopy;
   renderMeals(meals);
 }
 
@@ -287,16 +361,32 @@ function setSigningIn(isSigningIn) {
   signInButton.textContent = isSigningIn ? "Signing in..." : "Continue with Google";
 }
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   const isSignedIn = Boolean(user);
   signedOutView.hidden = isSignedIn;
   signedInView.hidden = !isSignedIn;
   signedInAs.textContent = user?.email ?? "";
+  state.userId = user?.uid ?? null;
   setSigningIn(false);
   setStatus();
 
   if (user) {
-    renderDay();
+    state.days = {};
+    try {
+      const settings = await getSettings(user.uid);
+      if (state.userId !== user.uid) {
+        return;
+      }
+      state.includeCaloriesInCopy = settings.includeCaloriesInCopy !== false;
+    } catch (error) {
+      console.error("Could not load copy settings.", error);
+      state.includeCaloriesInCopy = true;
+      setStatus("Your copy preference could not be loaded.");
+    }
+    await loadDay(state.currentDate);
+  } else {
+    state.days = {};
+    state.includeCaloriesInCopy = true;
   }
 });
 
@@ -324,12 +414,12 @@ signOutButton.addEventListener("click", async () => {
   }
 });
 
-datePicker.addEventListener("change", () => {
+datePicker.addEventListener("change", async () => {
   state.currentDate = datePicker.value || getTodayDate();
-  renderDay();
+  await loadDay(state.currentDate);
 });
 
-weightInput.addEventListener("change", () => {
+weightInput.addEventListener("change", async () => {
   const value = Number(weightInput.value);
   const day = getDay(state.currentDate);
 
@@ -340,20 +430,55 @@ weightInput.addEventListener("change", () => {
   }
 
   renderDay();
+  await saveCurrentDay("Weight saved.");
 });
 
-clearWeightButton.addEventListener("click", () => {
+clearWeightButton.addEventListener("click", async () => {
   delete getDay(state.currentDate).weight;
   renderDay();
   weightInput.focus();
+  await saveCurrentDay("Weight cleared.");
 });
 
-copyButton.addEventListener("click", () => {
-  setStatus("Copying entries is available in the next phase.");
+copyButton.addEventListener("click", async () => {
+  const meals = getDay(state.currentDate).meals;
+  const copiedMeals = meals.map((meal) => ({
+    time: meal.time,
+    rows: meal.rows.map((row) => {
+      const copiedRow = { item: row.item };
+      if (state.includeCaloriesInCopy && row.calories !== undefined) {
+        copiedRow.calories = row.calories;
+      }
+      return copiedRow;
+    })
+  }));
+  const text = JSON.stringify(copiedMeals, null, 2);
+
+  try {
+    await copyText(text);
+    copyButton.textContent = "Copied!";
+    setStatus("Day copied as JSON.");
+    window.setTimeout(() => {
+      copyButton.textContent = "Copy day as JSON";
+    }, 1_500);
+  } catch (error) {
+    console.error("Could not copy diary data.", error);
+    setStatus("Your diary could not be copied. Please try again.");
+  }
 });
 
-includeCaloriesToggle.addEventListener("change", () => {
-  setStatus("Your calorie preference will sync when saved settings are added.");
+includeCaloriesToggle.addEventListener("change", async () => {
+  const previousValue = state.includeCaloriesInCopy;
+  state.includeCaloriesInCopy = includeCaloriesToggle.checked;
+
+  try {
+    await saveSettings(state.userId, { includeCaloriesInCopy: state.includeCaloriesInCopy });
+  } catch (error) {
+    console.error("Could not save copy settings.", error);
+    state.includeCaloriesInCopy = previousValue;
+    includeCaloriesToggle.checked = previousValue;
+    setStatus("Your copy preference could not be saved. Please try again.");
+  }
 });
 
 addEntryButton.addEventListener("click", () => {
@@ -387,14 +512,41 @@ entryForm.addEventListener("submit", (event) => {
   }
 
   const meals = getDay(state.currentDate).meals;
+  let successMessage;
   if (state.editingMealIndex === null) {
     meals.push(meal);
-    setStatus("Entry added.");
+    successMessage = "Entry added.";
   } else {
     meals[state.editingMealIndex] = meal;
-    setStatus("Entry updated.");
+    successMessage = "Entry updated.";
   }
 
   closeEntryDialog();
   renderDay();
+  saveCurrentDay(successMessage);
 });
+
+async function copyText(text) {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch (error) {
+      console.warn("Clipboard API copy failed.", error);
+    }
+  }
+
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.setAttribute("readonly", "");
+  textArea.style.position = "fixed";
+  textArea.style.opacity = "0";
+  document.body.append(textArea);
+  textArea.select();
+  const didCopy = document.execCommand("copy");
+  textArea.remove();
+
+  if (!didCopy) {
+    throw new Error("Clipboard copy failed.");
+  }
+}
