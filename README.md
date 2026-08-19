@@ -72,13 +72,13 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - [x] Weight field gets a "Clear" (X) control to delete a locally retained value for the day; Firestore persistence is Phase 4
 
 ### Phase 4 — Persistence wiring (depends on Phases 1-3)
-- [ ] `firestore.js`: `getDay(uid, dateStr)`, `saveDay(uid, dateStr, dayData)`
-- [ ] `firestore.js`: `getWeightsForDateRange(uid, startDateStr, endDateStr)` — fetch the last ~8 days of weight values (via a doc-ID range query) for computing rolling averages
-- [ ] `firestore.js`: `getSettings(uid)` / `saveSettings(uid, settings)` for the persisted "include calories" toggle
-- [ ] On date change or sign-in, fetch and render that day's doc; empty state if none exists
-- [ ] Save weight field on change
-- [ ] Recompute both rolling weight averages whenever the selected date changes or the weight field is saved
-- [ ] Copy handler: build `{ time, rows }` meals array from the selected day, omitting each row's `calories` key entirely when the toggle is off; write to clipboard via `navigator.clipboard.writeText`, with a hidden-textarea/`execCommand('copy')` fallback; disable the button when the day has no meals; brief "Copied!" feedback on success
+- [x] `firestore.js`: `getDay(uid, dateStr)`, `saveDay(uid, dateStr, dayData)`
+- [x] `firestore.js`: `getWeightsForDateRange(uid, startDateStr, endDateStr)` — fetch the last 8 calendar days of weight values via a document-ID range query for computing rolling averages
+- [x] `firestore.js`: `getSettings(uid)` / `saveSettings(uid, settings)` for the persisted "include calories" toggle
+- [x] On date change or sign-in, fetch and render that day's doc; empty state if none exists
+- [x] Save weight field on change, including clearing an empty day document
+- [x] Recompute both rolling weight averages whenever the selected date changes or the weight field is saved
+- [x] Copy handler: build `{ time, rows }` meals array from the selected day, omitting each row's `calories` key entirely when the toggle is off; write to clipboard via `navigator.clipboard.writeText`, with a hidden-textarea/`execCommand('copy')` fallback; disable the button when the day has no meals; brief "Copied!" feedback on success
 
 ### Phase 5 — Historic graph (depends on Phase 4)
 - [ ] "View Graph" button opens a full-screen/modal view with a Chart.js line chart
