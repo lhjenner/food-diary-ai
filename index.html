@@ -20,12 +20,64 @@
       <header class="app-header">
         <div>
           <p class="eyebrow">Food diary</p>
-          <h1 id="app-title">Welcome back</h1>
+          <h1 id="app-title">Today</h1>
           <p class="signed-in-as" id="signed-in-as"></p>
         </div>
         <button class="button button-secondary" id="sign-out-button" type="button">Sign out</button>
       </header>
-      <p class="coming-soon">Your diary is ready. Daily entries arrive in the next phase.</p>
+
+      <div class="date-control">
+        <label for="date-picker">Viewing</label>
+        <input id="date-picker" type="date">
+      </div>
+
+      <section class="weight-section" aria-labelledby="weight-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Daily check-in</p>
+            <h2 id="weight-heading">Weight</h2>
+          </div>
+          <span class="weight-unit">lb</span>
+        </div>
+        <label class="visually-hidden" for="weight-input">Weight in pounds</label>
+        <div class="weight-input-row">
+          <input id="weight-input" type="number" inputmode="decimal" min="0" step="0.1" placeholder="Add today's weight">
+          <button class="icon-button" id="clear-weight-button" type="button" aria-label="Clear weight" title="Clear weight" hidden>&times;</button>
+        </div>
+        <dl class="average-list">
+          <div>
+            <dt>7-day average</dt>
+            <dd id="current-average">--</dd>
+          </div>
+          <div>
+            <dt>Yesterday's 7-day average</dt>
+            <dd id="previous-average">--</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="meal-section" aria-labelledby="meals-heading">
+        <div class="section-heading meal-heading">
+          <div>
+            <p class="eyebrow">Food log</p>
+            <h2 id="meals-heading">Meals</h2>
+          </div>
+          <p class="calorie-total"><span id="calorie-total">0</span> cal</p>
+        </div>
+        <div class="meal-list" id="meal-list"></div>
+        <p class="empty-state" id="empty-state">No entries for this day yet.</p>
+      </section>
+
+      <div class="copy-controls">
+        <button class="button button-secondary" id="copy-button" type="button" disabled>Copy day as JSON</button>
+        <label class="toggle-control" for="include-calories-toggle">
+          <input id="include-calories-toggle" type="checkbox" checked>
+          <span class="toggle-track" aria-hidden="true"></span>
+          <span>Include calories</span>
+        </label>
+      </div>
+
+      <button class="button button-primary add-entry-button" id="add-entry-button" type="button">Add entry</button>
     </section>
 
     <p class="status-message" id="status-message" role="status" aria-live="polite" hidden></p>

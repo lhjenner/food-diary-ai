@@ -54,13 +54,13 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - [x] Implement Google sign-in flow (sign-in button when signed out; app UI when signed in)
 
 ### Phase 2 — Core UI: Today page + date navigation (depends on Phase 1)
-- [ ] Header with current date, defaulting to "today"; `<input type="date">` picker for past dates
-- [ ] Weight input field (optional, numeric, saved on change) for the selected day
-- [ ] Below the weight input, show the rolling 7-day average (based on whatever entries are available, degrading gracefully during the first week) and the prior day's 7-day average, for at-a-glance trend context
-- [ ] Running calorie total display, recalculated whenever meals change
-- [ ] Container area rendering each saved meal as a card titled "Meal N" with its rows (time, item(s), calories)
-- [ ] "Add Entry" button, mobile-friendly placement (e.g., sticky bottom bar)
-- [ ] "Copy Day as JSON" button with an adjacent "Include calories" toggle near the running calorie total
+- [x] Header with current date, defaulting to "today"; `<input type="date">` picker for past dates
+- [x] Weight input field (optional, numeric, retained locally on change) for the selected day; Firestore persistence is Phase 4
+- [x] Below the weight input, show the rolling 7-day average (based on whatever entries are available, degrading gracefully during the first week) and the prior day's 7-day average, for at-a-glance trend context
+- [x] Running calorie total display, recalculated whenever the in-memory meal model changes
+- [x] Container area rendering each meal as a card titled "Meal N" with its rows (time, item(s), calories), plus an empty state
+- [x] "Add Entry" button, mobile-friendly placement; its entry form arrives in Phase 3
+- [x] "Copy Day as JSON" button with an adjacent "Include calories" toggle near the running calorie total; copying and preference persistence arrive in Phase 4
 
 ### Phase 3 — Add/Edit Entry modal (depends on Phase 2)
 - [ ] Row-based form: each row = time, item, calories (time/calories optional)
