@@ -10,7 +10,7 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - **Storage**: Firestore (multi-device sync needed).
 - **Auth**: Google Sign-In (Firebase Auth) so diary data is scoped to the user's Google account across devices.
 - **Hosting**: Firebase Hosting using its default `*.web.app` URL; no custom domain registration is needed.
-- **Firebase project**: does not exist yet — walk through creating it in the Firebase Console.
+- **Firebase project**: `food-diary-built-with-ai`.
 - **Graph library**: Chart.js (via CDN), toggle between Weight and Calories line graphs.
 - **Layout**: mobile-first single layout (no separate desktop/mobile styling).
 - **Editing**: meals and the daily weight can be edited/deleted after saving, not just added.
@@ -46,12 +46,12 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - [x] Enable Google sign-in provider in Authentication
 - [x] Register a Web App to get the config snippet
 - [x] Enable Firebase Hosting (use the default `*.web.app` URL); `firebase init` (Firestore + Hosting) run, generating `.firebaserc`, `firebase.json`, `firestore.rules`, `firestore.indexes.json`, `index.html`, `404.html`
-- [ ] Save the Firebase config into `js/firebase-config.js`
+- [x] Save the Firebase config into `js/firebase-config.js`
 
 ### Phase 1 — Project scaffold (depends on Phase 0)
-- [ ] Create file structure: `index.html`, `css/style.css`, `js/firebase-config.js`, `js/app.js`, `js/firestore.js`, `firebase.json`, `.firebaserc`, `firestore.rules`
-- [ ] Load Firebase SDK via CDN (modular v9+ syntax), init Auth + Firestore
-- [ ] Implement Google sign-in flow (sign-in button when signed out; app UI when signed in)
+- [x] Create file structure: `index.html`, `css/style.css`, `js/firebase-config.js`, `js/app.js`, `js/firestore.js`, `firebase.json`, `.firebaserc`, `firestore.rules`
+- [x] Load Firebase SDK via CDN (modular v9+ syntax), init Auth + Firestore
+- [x] Implement Google sign-in flow (sign-in button when signed out; app UI when signed in)
 
 ### Phase 2 — Core UI: Today page + date navigation (depends on Phase 1)
 - [ ] Header with current date, defaulting to "today"; `<input type="date">` picker for past dates

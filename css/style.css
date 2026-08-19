@@ -1,0 +1,155 @@
+:root {
+  color: #24322b;
+  background: #f6f3ec;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #f6f3ec;
+  background-image: linear-gradient(135deg, rgba(118, 148, 105, 0.16) 1px, transparent 1px), linear-gradient(45deg, rgba(118, 148, 105, 0.1) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+button {
+  font: inherit;
+}
+
+.page-shell {
+  width: min(100% - 32px, 640px);
+  margin: 0 auto;
+  padding: 72px 0 40px;
+}
+
+.sign-in-panel,
+.app-panel {
+  background: #fffdf8;
+  border: 1px solid #d9d4c6;
+  border-radius: 8px;
+  box-shadow: 0 18px 44px rgba(43, 57, 48, 0.12);
+  padding: 32px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: #5a6e57;
+  font-family: "Trebuchet MS", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  color: #1e2e27;
+  font-size: 2.25rem;
+  font-weight: 600;
+  line-height: 1.05;
+}
+
+.intro,
+.coming-soon,
+.signed-in-as {
+  font-family: "Trebuchet MS", sans-serif;
+  line-height: 1.6;
+}
+
+.intro {
+  max-width: 33rem;
+  margin: 18px 0 28px;
+  color: #536159;
+}
+
+.app-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.signed-in-as {
+  margin: 8px 0 0;
+  color: #536159;
+}
+
+.coming-soon {
+  margin: 42px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid #d9d4c6;
+  color: #536159;
+}
+
+.button {
+  min-height: 44px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: "Trebuchet MS", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 10px 16px;
+}
+
+.button:focus-visible {
+  outline: 3px solid #efb35c;
+  outline-offset: 3px;
+}
+
+.button-primary {
+  color: #fffdf8;
+  background: #365d49;
+}
+
+.button-primary:hover {
+  background: #284839;
+}
+
+.button-secondary {
+  color: #365d49;
+  background: transparent;
+  border-color: #9fad9a;
+}
+
+.button-secondary:hover {
+  background: #edf0e7;
+}
+
+.button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.status-message {
+  margin: 20px 0 0;
+  color: #9a2e2e;
+  font-family: "Trebuchet MS", sans-serif;
+  line-height: 1.5;
+}
+
+@media (max-width: 480px) {
+  .page-shell {
+    width: min(100% - 24px, 640px);
+    padding-top: 24px;
+  }
+
+  .sign-in-panel,
+  .app-panel {
+    padding: 24px;
+  }
+
+  .app-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .button-secondary {
+    align-self: start;
+  }
+}
