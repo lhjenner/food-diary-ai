@@ -5,6 +5,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 import {
   auth,
+  getDaysForDateRange,
   getDay as getStoredDay,
   getSettings,
   getWeightsForDateRange,
@@ -39,13 +40,25 @@ const addRowButton = document.querySelector("#add-row-button");
 const closeEntryDialogButton = document.querySelector("#close-entry-dialog");
 const cancelEntryButton = document.querySelector("#cancel-entry-button");
 const entryFormError = document.querySelector("#entry-form-error");
+const viewGraphButton = document.querySelector("#view-graph-button");
+const graphDialog = document.querySelector("#graph-dialog");
+const closeGraphDialogButton = document.querySelector("#close-graph-dialog");
+const graphDialogTitle = document.querySelector("#graph-dialog-title");
+const weightGraphButton = document.querySelector("#weight-graph-button");
+const calorieGraphButton = document.querySelector("#calorie-graph-button");
+const graphMessage = document.querySelector("#graph-message");
+const chartFrame = document.querySelector("#chart-frame");
+const historyChartCanvas = document.querySelector("#history-chart");
 
 const state = {
   currentDate: getTodayDate(),
   days: {},
   editingMealIndex: null,
   includeCaloriesInCopy: true,
-  userId: null
+  userId: null,
+  graphChart: null,
+  graphMode: "weight",
+  historyDays: []
 };
 
 function getTodayDate() {
@@ -160,6 +173,13 @@ function formatDateHeading(dateString) {
     month: "long",
     day: "numeric"
   }).format(date);
+}
+
+function formatChartDate(dateString) {
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric"
+  }).format(new Date(`${dateString}T00:00:00`));
 }
 
 function getCalories(meals) {
@@ -361,6 +381,107 @@ function setSigningIn(isSigningIn) {
   signInButton.textContent = isSigningIn ? "Signing in..." : "Continue with Google";
 }
 
+function setGraphMode(mode) {
+  state.graphMode = mode;
+  const isWeightMode = mode === "weight";
+
+  graphDialogTitle.textContent = isWeightMode ? "Weight trend" : "Calorie trend";
+  weightGraphButton.classList.toggle("is-active", isWeightMode);
+  calorieGraphButton.classList.toggle("is-active", !isWeightMode);
+  weightGraphButton.setAttribute("aria-pressed", String(isWeightMode));
+  calorieGraphButton.setAttribute("aria-pressed", String(!isWeightMode));
+  renderHistoryChart();
+}
+
+function renderHistoryChart() {
+  state.graphChart?.destroy();
+  state.graphChart = null;
+
+  const isWeightMode = state.graphMode === "weight";
+  const values = state.historyDays.map((day) => {
+    if (isWeightMode) {
+      return Number.isFinite(day.weight) ? day.weight : null;
+    }
+
+    return Array.isArray(day.meals) && day.meals.length ? getCalories(day.meals) : null;
+  });
+  const hasValues = values.some((value) => value !== null);
+
+  chartFrame.hidden = !hasValues;
+  graphMessage.hidden = hasValues;
+  if (!hasValues) {
+    graphMessage.textContent = isWeightMode ? "No weight entries in the last 90 days." : "No meal entries in the last 90 days.";
+    return;
+  }
+
+  const label = isWeightMode ? "Weight (lb)" : "Calories";
+  const color = isWeightMode ? "#365d49" : "#c46231";
+  state.graphChart = new window.Chart(historyChartCanvas, {
+    type: "line",
+    data: {
+      labels: state.historyDays.map((day) => formatChartDate(day.date)),
+      datasets: [{
+        label,
+        data: values,
+        borderColor: color,
+        backgroundColor: `${color}22`,
+        borderWidth: 2,
+        pointBackgroundColor: color,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        spanGaps: false,
+        tension: 0.25,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { displayColors: false }
+      },
+      scales: {
+        x: {
+          ticks: { autoSkip: true, maxTicksLimit: 6 },
+          grid: { display: false }
+        },
+        y: {
+          title: { display: true, text: label },
+          ticks: { maxTicksLimit: 6 }
+        }
+      }
+    }
+  });
+}
+
+async function openGraphDialog() {
+  if (!state.userId) {
+    return;
+  }
+
+  graphDialog.showModal();
+  chartFrame.hidden = true;
+  graphMessage.hidden = false;
+  graphMessage.textContent = "Loading history...";
+  state.graphChart?.destroy();
+  state.graphChart = null;
+
+  if (!window.Chart) {
+    graphMessage.textContent = "The chart library could not be loaded. Please try again.";
+    return;
+  }
+
+  try {
+    const today = getTodayDate();
+    state.historyDays = await getDaysForDateRange(state.userId, getDateOffset(today, -89), today);
+    renderHistoryChart();
+  } catch (error) {
+    console.error("Could not load history.", error);
+    graphMessage.textContent = "Your history could not be loaded. Please try again.";
+  }
+}
+
 onAuthStateChanged(auth, async (user) => {
   const isSignedIn = Boolean(user);
   signedOutView.hidden = isSignedIn;
@@ -483,6 +604,16 @@ includeCaloriesToggle.addEventListener("change", async () => {
 
 addEntryButton.addEventListener("click", () => {
   openEntryDialog();
+});
+
+viewGraphButton.addEventListener("click", openGraphDialog);
+closeGraphDialogButton.addEventListener("click", () => graphDialog.close());
+weightGraphButton.addEventListener("click", () => setGraphMode("weight"));
+calorieGraphButton.addEventListener("click", () => setGraphMode("calories"));
+
+graphDialog.addEventListener("close", () => {
+  state.graphChart?.destroy();
+  state.graphChart = null;
 });
 
 addRowButton.addEventListener("click", () => {

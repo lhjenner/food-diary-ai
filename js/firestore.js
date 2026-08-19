@@ -73,6 +73,22 @@ export async function getWeightsForDateRange(uid, startDateString, endDateString
 	return weights;
 }
 
+export async function getDaysForDateRange(uid, startDateString, endDateString) {
+	const daysReference = collection(db, "users", uid, "days");
+	const daysQuery = query(
+		daysReference,
+		where(documentId(), ">=", startDateString),
+		where(documentId(), "<=", endDateString),
+		orderBy(documentId())
+	);
+	const snapshot = await getDocs(daysQuery);
+
+	return snapshot.docs.map((day) => ({
+		date: day.id,
+		...day.data()
+	}));
+}
+
 export async function getSettings(uid) {
 	const snapshot = await getDoc(getSettingsReference(uid));
 	return snapshot.exists() ? snapshot.data() : {};
