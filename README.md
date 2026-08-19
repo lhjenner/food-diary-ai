@@ -21,7 +21,7 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - Doc shape:
   ```json
   {
-    "weight": 180.5,
+    "weight": 81.9,
     "meals": [
       {
         "time": "08:30",
@@ -34,6 +34,7 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
   }
   ```
 - Meal display title ("Meal 1", "Meal 2", ...) is derived from array index, not stored.
+- Weight values are recorded and displayed in kilograms.
 - Rolling 7-day weight averages (current window and the window ending the previous day) are derived client-side from `weight` values across nearby day docs; not stored themselves.
 - User settings doc: `users/{uid}/meta/settings` — `{ "includeCaloriesInCopy": true }` (defaults to `true` when absent); persists the "include calories" toggle for the Copy-as-JSON feature across devices.
 - Security rules: only `request.auth.uid` matching the `{uid}` path segment can read/write, covering both the `days` docs and the `meta/settings` doc.
