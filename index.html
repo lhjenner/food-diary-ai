@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#f6f3ec">
   <title>Food Diary</title>
   <link rel="stylesheet" href="css/style.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <main class="page-shell">
@@ -23,7 +24,10 @@
           <h1 id="app-title">Today</h1>
           <p class="signed-in-as" id="signed-in-as"></p>
         </div>
-        <button class="button button-secondary" id="sign-out-button" type="button">Sign out</button>
+        <div class="app-actions">
+          <button class="button button-secondary" id="view-graph-button" type="button">View graph</button>
+          <button class="button button-secondary" id="sign-out-button" type="button">Sign out</button>
+        </div>
       </header>
 
       <div class="date-control">
@@ -102,6 +106,26 @@
         <button class="button button-primary" type="submit">Save entry</button>
       </div>
     </form>
+  </dialog>
+
+  <dialog class="graph-dialog" id="graph-dialog" aria-labelledby="graph-dialog-title">
+    <div class="graph-dialog-content">
+      <div class="dialog-header">
+        <div>
+          <p class="eyebrow">Last 90 days</p>
+          <h2 id="graph-dialog-title">Weight trend</h2>
+        </div>
+        <button class="icon-button" id="close-graph-dialog" type="button" aria-label="Close graph" title="Close graph">&times;</button>
+      </div>
+      <div class="graph-mode-control" role="group" aria-label="Graph type">
+        <button class="graph-mode-button is-active" id="weight-graph-button" type="button" aria-pressed="true">Weight</button>
+        <button class="graph-mode-button" id="calorie-graph-button" type="button" aria-pressed="false">Calories</button>
+      </div>
+      <p class="graph-message" id="graph-message" role="status" aria-live="polite">Loading history...</p>
+      <div class="chart-frame" id="chart-frame" hidden>
+        <canvas id="history-chart" aria-label="Historic trend chart" role="img"></canvas>
+      </div>
+    </div>
   </dialog>
 
   <script type="module" src="js/app.js"></script>
