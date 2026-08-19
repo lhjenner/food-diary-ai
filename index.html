@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f3ec">
   <title>Food Diary</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
   <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
@@ -41,11 +42,11 @@
             <p class="eyebrow">Daily check-in</p>
             <h2 id="weight-heading">Weight</h2>
           </div>
-          <span class="weight-unit">lb</span>
+          <span class="weight-unit">kg</span>
         </div>
-        <label class="visually-hidden" for="weight-input">Weight in pounds</label>
+        <label class="visually-hidden" for="weight-input">Weight in kilograms</label>
         <div class="weight-input-row">
-          <input id="weight-input" type="number" inputmode="decimal" min="0" step="0.1" placeholder="Add today's weight">
+          <input id="weight-input" type="number" inputmode="decimal" min="0" step="0.1" placeholder="Add today's weight in kg">
           <button class="icon-button" id="clear-weight-button" type="button" aria-label="Clear weight" title="Clear weight" hidden>&times;</button>
         </div>
         <dl class="average-list">

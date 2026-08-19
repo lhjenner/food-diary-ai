@@ -35,7 +35,16 @@ export async function getDay(uid, dateString) {
 }
 
 export async function saveDay(uid, dateString, dayData) {
-	const meals = dayData.meals ?? [];
+	const meals = (dayData.meals ?? []).map((meal) => ({
+		time: meal.time ?? "",
+		rows: (meal.rows ?? []).map((row) => {
+			const savedRow = { item: row.item };
+			if (Number.isFinite(row.calories)) {
+				savedRow.calories = row.calories;
+			}
+			return savedRow;
+		})
+	}));
 	const hasWeight = Number.isFinite(dayData.weight);
 	const dayReference = getDayReference(uid, dateString);
 

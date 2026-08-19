@@ -163,7 +163,7 @@ function getRollingAverage(endDateString) {
 }
 
 function formatAverage(value) {
-  return value === null ? "--" : `${value.toFixed(1)} lb`;
+  return value === null ? "--" : `${value.toFixed(1)} kg`;
 }
 
 function formatDateHeading(dateString) {
@@ -320,9 +320,11 @@ function getMealFromForm() {
     .map((row) => {
       const item = row.querySelector("input[name='item']").value.trim();
       const calorieInput = row.querySelector("input[name='calories']").value;
-      const calories = calorieInput === "" ? undefined : Number(calorieInput);
-
-      return { item, calories };
+      const mealRow = { item };
+      if (calorieInput !== "") {
+        mealRow.calories = Number(calorieInput);
+      }
+      return mealRow;
     })
     .filter((row) => row.item);
 
@@ -330,7 +332,7 @@ function getMealFromForm() {
     return null;
   }
 
-  if (rows.some((row) => !Number.isFinite(row.calories) && row.calories !== undefined)) {
+  if (rows.some((row) => row.calories !== undefined && !Number.isFinite(row.calories))) {
     return "Calories must be a valid number.";
   }
 
@@ -414,7 +416,7 @@ function renderHistoryChart() {
     return;
   }
 
-  const label = isWeightMode ? "Weight (lb)" : "Calories";
+  const label = isWeightMode ? "Weight (kg)" : "Calories";
   const color = isWeightMode ? "#365d49" : "#c46231";
   state.graphChart = new window.Chart(historyChartCanvas, {
     type: "line",
