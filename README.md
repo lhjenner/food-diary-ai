@@ -81,14 +81,14 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - [x] Copy handler: build `{ time, rows }` meals array from the selected day, omitting each row's `calories` key entirely when the toggle is off; write to clipboard via `navigator.clipboard.writeText`, with a hidden-textarea/`execCommand('copy')` fallback; disable the button when the day has no meals; brief "Copied!" feedback on success
 
 ### Phase 5 — Historic graph (depends on Phase 4)
-- [ ] "View Graph" button opens a full-screen/modal view with a Chart.js line chart
-- [ ] Toggle control switches dataset between "Weight" and "Calories"
-- [ ] Query `users/{uid}/days` ordered by date (e.g., last 90 days), map to per-date series client-side
+- [x] "View graph" button opens a modal view with a Chart.js line chart
+- [x] Segmented control switches dataset between "Weight" and "Calories"
+- [x] Query `users/{uid}/days` by document-ID date range for the last 90 days, map to per-date series client-side
 
 ### Phase 6 — Mobile-first styling (parallel with Phases 2-5, finalized last)
-- [ ] Single responsive column layout, large tap targets, sticky "Add Entry" button
-- [ ] Modal goes full-screen on small viewports
-- [ ] Simple CSS in `css/style.css`, no framework needed
+- [x] Single responsive column layout, large tap targets, sticky "Add entry" button
+- [x] Entry and graph modals go full-screen on small viewports
+- [x] Simple responsive CSS in `css/style.css`, no framework needed
 
 ### Phase 7 — Deploy (depends on all previous phases)
 - [ ] `firebase init hosting` (or manual `firebase.json`)
