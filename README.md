@@ -11,6 +11,7 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - **Auth**: Google Sign-In (Firebase Auth) so diary data is scoped to the user's Google account across devices.
 - **Hosting**: Firebase Hosting using its default `*.web.app` URL; no custom domain registration is needed.
 - **Firebase project**: `food-diary-built-with-ai`.
+- **Firebase web config**: loaded from Firebase Hosting's `/__/firebase/init.json` endpoint at runtime; no API key is committed to the repository.
 - **Graph library**: Chart.js (via CDN), toggle between Weight and Calories line graphs.
 - **Layout**: mobile-first single layout (no separate desktop/mobile styling).
 - **Editing**: meals and the daily weight can be edited/deleted after saving, not just added.
@@ -47,10 +48,10 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - [x] Enable Google sign-in provider in Authentication
 - [x] Register a Web App to get the config snippet
 - [x] Enable Firebase Hosting (use the default `*.web.app` URL); `firebase init` (Firestore + Hosting) run, generating `.firebaserc`, `firebase.json`, `firestore.rules`, `firestore.indexes.json`, `index.html`, `404.html`
-- [x] Save the Firebase config into `js/firebase-config.js`
+- [x] Load the Firebase config from Firebase Hosting at runtime
 
 ### Phase 1 — Project scaffold (depends on Phase 0)
-- [x] Create file structure: `index.html`, `css/style.css`, `js/firebase-config.js`, `js/app.js`, `js/firestore.js`, `firebase.json`, `.firebaserc`, `firestore.rules`
+- [x] Create file structure: `index.html`, `css/style.css`, `js/app.js`, `js/firestore.js`, `firebase.json`, `.firebaserc`, `firestore.rules`
 - [x] Load Firebase SDK via CDN (modular v9+ syntax), init Auth + Firestore
 - [x] Implement Google sign-in flow (sign-in button when signed out; app UI when signed in)
 
@@ -96,11 +97,10 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - [x] `firebase deploy` published https://food-diary-built-with-ai.web.app and the live sign-in page responds; manual phone verification remains in the verification checklist
 - [x] Deploy Firestore security rules (`firebase deploy --only firestore:rules`)
 
-## Relevant files (to be created)
+## Relevant files
 
 - `index.html` — app shell, sign-in button, date picker, weight input, meal container area, Add Entry button, modal markup, graph modal markup
 - `css/style.css` — mobile-first styles
-- `js/firebase-config.js` — Firebase project config (from Phase 0)
 - `js/app.js` — state management, rendering, modal logic, event wiring
 - `js/firestore.js` — Firestore read/write helpers
 - `firestore.rules` — per-user access rules
@@ -118,6 +118,12 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - [ ] Sign in on a second device/browser profile and confirm the "include calories" toggle reflects the last value saved
 - [ ] Test on an actual mobile phone browser (or device emulation) for layout/tap target sanity
 - [ ] Deploy check: visit Firebase Hosting URL from phone, confirm full flow works end-to-end
+
+## Firebase API key security
+
+The Firebase Web API key is an identifier used by the browser, not a server credential. It is still restricted in Google Cloud Console to the Firebase APIs used by this app and to the production hosting origin. Firestore access is enforced by `firestore.rules` and Firebase Authentication, not by hiding the web key.
+
+Do not add service-account JSON, Admin SDK credentials, OAuth client secrets, or other private credentials to this repository. Keep local environment files ignored and never commit them.
 
 ## Scope exclusions
 

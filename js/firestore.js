@@ -13,9 +13,13 @@ import {
 	setDoc,
 	where
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-import { firebaseConfig } from "./firebase-config.js";
 
-const app = initializeApp(firebaseConfig);
+const firebaseConfigResponse = await fetch("/__/firebase/init.json");
+if (!firebaseConfigResponse.ok) {
+	throw new Error("Firebase Hosting configuration could not be loaded.");
+}
+
+const app = initializeApp(await firebaseConfigResponse.json());
 
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
