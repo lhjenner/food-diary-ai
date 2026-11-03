@@ -428,7 +428,7 @@ function renderHistoryChart() {
         pointBackgroundColor: color,
         pointRadius: 3,
         pointHoverRadius: 5,
-        spanGaps: false,
+        spanGaps: isWeightMode,
         tension: 0.25,
         fill: true
       }]
