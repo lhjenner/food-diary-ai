@@ -53,6 +53,7 @@ const chartFrame = document.querySelector("#chart-frame");
 const historyChartCanvas = document.querySelector("#history-chart");
 
 const WEIGHT_AVERAGE_ENTRY_COUNT = 7;
+const GRAPH_RANGE_STORAGE_KEY = "food-diary-graph-range";
 
 const state = {
   currentDate: getTodayDate(),
@@ -66,6 +67,26 @@ const state = {
   graphLoadId: 0,
   historyDays: []
 };
+
+function restoreGraphRange() {
+  try {
+    const savedRange = localStorage.getItem(GRAPH_RANGE_STORAGE_KEY);
+    if (savedRange !== null) {
+      const isValid = Array.from(graphRangeSelect.options).some((option) => option.value === savedRange);
+      if (isValid) {
+        state.graphRange = Number(savedRange);
+      } else {
+        console.warn("Ignoring invalid saved graph date range.");
+        localStorage.removeItem(GRAPH_RANGE_STORAGE_KEY);
+      }
+    }
+  } catch (error) {
+    console.warn("Could not restore the graph date range from local storage.", error);
+  }
+
+  graphRangeSelect.value = String(state.graphRange);
+  graphRangeLabel.textContent = `Last ${state.graphRange} days`;
+}
 
 function getTodayDate() {
   const now = new Date();
@@ -515,6 +536,8 @@ async function openGraphDialog() {
   await loadGraphHistory();
 }
 
+restoreGraphRange();
+
 onAuthStateChanged(auth, async (user) => {
   const isSignedIn = Boolean(user);
   signedOutView.hidden = isSignedIn;
@@ -643,6 +666,12 @@ viewGraphButton.addEventListener("click", openGraphDialog);
 closeGraphDialogButton.addEventListener("click", () => graphDialog.close());
 graphRangeSelect.addEventListener("change", () => {
   state.graphRange = Number(graphRangeSelect.value);
+  try {
+    localStorage.setItem(GRAPH_RANGE_STORAGE_KEY, String(state.graphRange));
+  } catch (error) {
+    console.error("Could not save the graph date range to local storage.", error);
+    setStatus("Your graph date range could not be remembered on this browser.");
+  }
   if (window.Chart) {
     loadGraphHistory();
   }

@@ -86,6 +86,7 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - [x] "View graph" button opens a modal view with a Chart.js line chart
 - [x] Segmented control switches dataset between "Weight" and "Calories"
 - [x] Query `users/{uid}/days` by document-ID date range for a selectable 14-, 30-, 60-, or 90-day history, map to per-date series client-side
+- [x] Remember the graph date range in localStorage per browser, independently of other devices and accounts. Defaults to 90 days when no valid preference exists or browser storage is unavailable; clearing site data resets it.
 
 ### Phase 6 — Mobile-first styling (parallel with Phases 2-5, finalized last)
 - [x] Single responsive column layout, large tap targets, sticky "Add entry" button
