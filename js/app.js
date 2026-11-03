@@ -7,8 +7,8 @@ import {
   auth,
   getDaysForDateRange,
   getDay as getStoredDay,
+  getLatestWeights,
   getSettings,
-  getWeightsForDateRange,
   googleProvider,
   saveDay,
   saveSettings
@@ -49,6 +49,8 @@ const calorieGraphButton = document.querySelector("#calorie-graph-button");
 const graphMessage = document.querySelector("#graph-message");
 const chartFrame = document.querySelector("#chart-frame");
 const historyChartCanvas = document.querySelector("#history-chart");
+
+const WEIGHT_AVERAGE_ENTRY_COUNT = 7;
 
 const state = {
   currentDate: getTodayDate(),
@@ -99,12 +101,10 @@ async function loadDay(dateString) {
     return;
   }
 
-  const averageStartDate = getDateOffset(dateString, -7);
-
   try {
     const [storedDay, weights] = await Promise.all([
       getStoredDay(uid, dateString),
-      getWeightsForDateRange(uid, averageStartDate, dateString)
+      getLatestWeights(uid, dateString, WEIGHT_AVERAGE_ENTRY_COUNT + 1)
     ]);
 
     if (state.userId !== uid || state.currentDate !== dateString) {
@@ -146,14 +146,11 @@ async function saveCurrentDay(successMessage = "") {
 }
 
 function getRollingAverage(endDateString) {
-  const weights = [];
-
-  for (let offset = 0; offset > -7; offset -= 1) {
-    const weight = state.days[getDateOffset(endDateString, offset)]?.weight;
-    if (Number.isFinite(weight)) {
-      weights.push(weight);
-    }
-  }
+  const weights = Object.entries(state.days)
+    .filter(([date, day]) => date <= endDateString && Number.isFinite(day.weight))
+    .sort(([dateA], [dateB]) => dateB.localeCompare(dateA))
+    .slice(0, WEIGHT_AVERAGE_ENTRY_COUNT)
+    .map(([, day]) => day.weight);
 
   if (!weights.length) {
     return null;
