@@ -106,7 +106,7 @@ async function loadDay(dateString) {
   }
 
   try {
-    const [storedDay, weights] = await Promise.all([
+    const [dayResult, weightsResult] = await Promise.allSettled([
       getStoredDay(uid, dateString),
       getLatestWeights(uid, dateString, WEIGHT_AVERAGE_ENTRY_COUNT + 1)
     ]);
@@ -115,10 +115,19 @@ async function loadDay(dateString) {
       return;
     }
 
-    state.days[dateString] = normalizeDay(storedDay);
-    Object.entries(weights).forEach(([date, weight]) => {
-      getDay(date).weight = weight;
-    });
+    if (dayResult.status === "rejected") {
+      throw dayResult.reason;
+    }
+
+    state.days[dateString] = normalizeDay(dayResult.value);
+    if (weightsResult.status === "fulfilled") {
+      Object.entries(weightsResult.value).forEach(([date, weight]) => {
+        getDay(date).weight = weight;
+      });
+    } else {
+      console.error("Could not load weight averages.", weightsResult.reason);
+      setStatus("Your diary is loaded, but weight averages could not be loaded. Please try again.");
+    }
     renderDay();
   } catch (error) {
     console.error("Could not load diary data.", error);

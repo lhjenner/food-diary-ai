@@ -75,7 +75,7 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 
 ### Phase 4 — Persistence wiring (depends on Phases 1-3)
 - [x] `firestore.js`: `getDay(uid, dateStr)`, `saveDay(uid, dateStr, dayData)`
-- [x] `firestore.js`: `getLatestWeights(uid, endDateStr, count)` — page backward through day docs until the requested number of weight values is found for the rolling averages
+- [x] `firestore.js`: `getLatestWeights(uid, endDateStr, count)` — page backward through day docs until enough weights are found; requires the descending document-ID index defined in `firestore.indexes.json`
 - [x] `firestore.js`: `getSettings(uid)` / `saveSettings(uid, settings)` for the persisted "include calories" toggle
 - [x] On date change or sign-in, fetch and render that day's doc; empty state if none exists
 - [x] Save weight field on change, including clearing an empty day document
@@ -96,6 +96,8 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - [x] `firebase init hosting` (or manual `firebase.json`)
 - [x] `firebase deploy` published https://food-diary-built-with-ai.web.app and the live sign-in page responds; manual phone verification remains in the verification checklist
 - [x] Deploy Firestore security rules (`firebase deploy --only firestore:rules`)
+
+For HTML/CSS/JavaScript changes, run `firebase deploy --only hosting` after merging and updating your local checkout. There is no build step. For index changes, also run `firebase deploy --only firestore:indexes` and wait for the index to finish building in the Firebase console. The latest-weight query requires the descending document-ID index defined in `firestore.indexes.json`. A failed weight-average query is reported separately and does not hide a successfully loaded day's meals.
 
 ## Relevant files
 
