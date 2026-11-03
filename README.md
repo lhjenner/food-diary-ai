@@ -85,7 +85,7 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 ### Phase 5 — Historic graph (depends on Phase 4)
 - [x] "View graph" button opens a modal view with a Chart.js line chart
 - [x] Segmented control switches dataset between "Weight" and "Calories"
-- [x] Query `users/{uid}/days` by document-ID date range for the last 90 days, map to per-date series client-side
+- [x] Query `users/{uid}/days` by document-ID date range for a selectable 14-, 30-, 60-, or 90-day history, map to per-date series client-side
 
 ### Phase 6 — Mobile-first styling (parallel with Phases 2-5, finalized last)
 - [x] Single responsive column layout, large tap targets, sticky "Add entry" button

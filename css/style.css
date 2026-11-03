@@ -490,12 +490,39 @@ h3 {
   padding: 24px;
 }
 
+.graph-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
 .graph-mode-control {
   display: inline-flex;
-  margin-bottom: 20px;
   border: 1px solid #9fad9a;
   border-radius: 6px;
   overflow: hidden;
+}
+
+.graph-range-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #536159;
+  font-family: "Trebuchet MS", sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.graph-range-control select {
+  min-height: 38px;
+  border: 1px solid #9fad9a;
+  border-radius: 6px;
+  color: #24322b;
+  background: #fffdf8;
+  font: inherit;
+  padding: 6px 10px;
 }
 
 .graph-mode-button {
@@ -521,6 +548,7 @@ h3 {
 }
 
 .graph-mode-button:focus-visible,
+.graph-range-control select:focus-visible,
 .text-button:focus-visible {
   outline: 3px solid #efb35c;
   outline-offset: -3px;
@@ -592,6 +620,11 @@ h3 {
   .graph-dialog-content {
     min-height: 100vh;
     padding: 24px;
+  }
+
+  .graph-controls {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .chart-frame {

@@ -44,6 +44,8 @@ const viewGraphButton = document.querySelector("#view-graph-button");
 const graphDialog = document.querySelector("#graph-dialog");
 const closeGraphDialogButton = document.querySelector("#close-graph-dialog");
 const graphDialogTitle = document.querySelector("#graph-dialog-title");
+const graphRangeLabel = document.querySelector("#graph-range-label");
+const graphRangeSelect = document.querySelector("#graph-range-select");
 const weightGraphButton = document.querySelector("#weight-graph-button");
 const calorieGraphButton = document.querySelector("#calorie-graph-button");
 const graphMessage = document.querySelector("#graph-message");
@@ -60,6 +62,8 @@ const state = {
   userId: null,
   graphChart: null,
   graphMode: "weight",
+  graphRange: 90,
+  graphLoadId: 0,
   historyDays: []
 };
 
@@ -395,6 +399,7 @@ function setGraphMode(mode) {
 function renderHistoryChart() {
   state.graphChart?.destroy();
   state.graphChart = null;
+  graphRangeLabel.textContent = `Last ${state.graphRange} days`;
 
   const isWeightMode = state.graphMode === "weight";
   const values = state.historyDays.map((day) => {
@@ -409,7 +414,9 @@ function renderHistoryChart() {
   chartFrame.hidden = !hasValues;
   graphMessage.hidden = hasValues;
   if (!hasValues) {
-    graphMessage.textContent = isWeightMode ? "No weight entries in the last 90 days." : "No meal entries in the last 90 days.";
+    graphMessage.textContent = isWeightMode
+      ? `No weight entries in the last ${state.graphRange} days.`
+      : `No meal entries in the last ${state.graphRange} days.`;
     return;
   }
 
@@ -454,31 +461,49 @@ function renderHistoryChart() {
   });
 }
 
-async function openGraphDialog() {
-  if (!state.userId) {
+async function loadGraphHistory() {
+  const uid = state.userId;
+  if (!uid) {
     return;
   }
 
-  graphDialog.showModal();
+  const requestId = ++state.graphLoadId;
+  const range = state.graphRange;
   chartFrame.hidden = true;
   graphMessage.hidden = false;
   graphMessage.textContent = "Loading history...";
   state.graphChart?.destroy();
   state.graphChart = null;
 
+  try {
+    const today = getTodayDate();
+    const days = await getDaysForDateRange(uid, getDateOffset(today, 1 - range), today);
+    if (requestId !== state.graphLoadId || state.userId !== uid || !graphDialog.open) {
+      return;
+    }
+    state.historyDays = days;
+    renderHistoryChart();
+  } catch (error) {
+    if (requestId !== state.graphLoadId) {
+      return;
+    }
+    console.error("Could not load history.", error);
+    graphMessage.textContent = "Your history could not be loaded. Please try again.";
+  }
+}
+
+async function openGraphDialog() {
+  if (!state.userId) {
+    return;
+  }
+
+  graphDialog.showModal();
   if (!window.Chart) {
     graphMessage.textContent = "The chart library could not be loaded. Please try again.";
     return;
   }
 
-  try {
-    const today = getTodayDate();
-    state.historyDays = await getDaysForDateRange(state.userId, getDateOffset(today, -89), today);
-    renderHistoryChart();
-  } catch (error) {
-    console.error("Could not load history.", error);
-    graphMessage.textContent = "Your history could not be loaded. Please try again.";
-  }
+  await loadGraphHistory();
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -607,10 +632,17 @@ addEntryButton.addEventListener("click", () => {
 
 viewGraphButton.addEventListener("click", openGraphDialog);
 closeGraphDialogButton.addEventListener("click", () => graphDialog.close());
+graphRangeSelect.addEventListener("change", () => {
+  state.graphRange = Number(graphRangeSelect.value);
+  if (window.Chart) {
+    loadGraphHistory();
+  }
+});
 weightGraphButton.addEventListener("click", () => setGraphMode("weight"));
 calorieGraphButton.addEventListener("click", () => setGraphMode("calories"));
 
 graphDialog.addEventListener("close", () => {
+  state.graphLoadId += 1;
   state.graphChart?.destroy();
   state.graphChart = null;
 });
