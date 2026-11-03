@@ -8,9 +8,11 @@ import {
 	getDoc,
 	getDocs,
 	getFirestore,
+	limit,
 	orderBy,
 	query,
 	setDoc,
+	startAfter,
 	where
 } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
@@ -65,23 +67,37 @@ export async function saveDay(uid, dateString, dayData) {
 	await setDoc(dayReference, data);
 }
 
-export async function getWeightsForDateRange(uid, startDateString, endDateString) {
+export async function getLatestWeights(uid, endDateString, count) {
 	const daysReference = collection(db, "users", uid, "days");
-	const daysQuery = query(
-		daysReference,
-		where(documentId(), ">=", startDateString),
-		where(documentId(), "<=", endDateString),
-		orderBy(documentId())
-	);
-	const snapshot = await getDocs(daysQuery);
 	const weights = {};
+	const pageSize = 25;
+	let cursor;
+	let weightCount = 0;
 
-	snapshot.forEach((day) => {
-		const weight = day.data().weight;
-		if (Number.isFinite(weight)) {
-			weights[day.id] = weight;
+	while (weightCount < count) {
+		const constraints = [
+			where(documentId(), "<=", endDateString),
+			orderBy(documentId(), "desc"),
+			limit(pageSize)
+		];
+		if (cursor) {
+			constraints.push(startAfter(cursor));
 		}
-	});
+
+		const snapshot = await getDocs(query(daysReference, ...constraints));
+		snapshot.forEach((day) => {
+			const weight = day.data().weight;
+			if (Number.isFinite(weight) && weightCount < count) {
+				weights[day.id] = weight;
+				weightCount += 1;
+			}
+		});
+
+		if (snapshot.empty || snapshot.size < pageSize || weightCount >= count) {
+			break;
+		}
+		cursor = snapshot.docs[snapshot.docs.length - 1];
+	}
 
 	return weights;
 }

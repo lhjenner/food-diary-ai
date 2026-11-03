@@ -36,7 +36,7 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
   ```
 - Meal display title ("Meal 1", "Meal 2", ...) is derived from array index, not stored.
 - Weight values are recorded and displayed in kilograms.
-- Rolling 7-day weight averages (current window and the window ending the previous day) are derived client-side from `weight` values across nearby day docs; not stored themselves.
+- Rolling 7-entry weight averages (the current average and the average ending the previous day) are derived client-side from the latest weigh-ins on or before each date; missed days do not reduce the sample size. The averages are not stored.
 - User settings doc: `users/{uid}/meta/settings` — `{ "includeCaloriesInCopy": true }` (defaults to `true` when absent); persists the "include calories" toggle for the Copy-as-JSON feature across devices.
 - Security rules: only `request.auth.uid` matching the `{uid}` path segment can read/write, covering both the `days` docs and the `meta/settings` doc.
 
@@ -75,7 +75,7 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 
 ### Phase 4 — Persistence wiring (depends on Phases 1-3)
 - [x] `firestore.js`: `getDay(uid, dateStr)`, `saveDay(uid, dateStr, dayData)`
-- [x] `firestore.js`: `getWeightsForDateRange(uid, startDateStr, endDateStr)` — fetch the last 8 calendar days of weight values via a document-ID range query for computing rolling averages
+- [x] `firestore.js`: `getLatestWeights(uid, endDateStr, count)` — page backward through day docs until the requested number of weight values is found for the rolling averages
 - [x] `firestore.js`: `getSettings(uid)` / `saveSettings(uid, settings)` for the persisted "include calories" toggle
 - [x] On date change or sign-in, fetch and render that day's doc; empty state if none exists
 - [x] Save weight field on change, including clearing an empty day document
@@ -85,7 +85,7 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 ### Phase 5 — Historic graph (depends on Phase 4)
 - [x] "View graph" button opens a modal view with a Chart.js line chart
 - [x] Segmented control switches dataset between "Weight" and "Calories"
-- [x] Query `users/{uid}/days` by document-ID date range for the last 90 days, map to per-date series client-side
+- [x] Query `users/{uid}/days` by document-ID date range for a selectable 14-, 30-, 60-, or 90-day history, map to per-date series client-side
 
 ### Phase 6 — Mobile-first styling (parallel with Phases 2-5, finalized last)
 - [x] Single responsive column layout, large tap targets, sticky "Add entry" button
@@ -113,7 +113,7 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - [ ] Edit and delete a meal; confirm changes persist
 - [ ] Enter/update/clear weight for a day; reload page; confirm it persisted
 - [ ] Open graph, toggle Weight/Calories; confirm the line chart reflects entered data across multiple days
-- [ ] Enter weight for several consecutive days; confirm the 7-day average and "yesterday's" 7-day average shown under the weight input match manual calculation, including correct behavior during the first week (fewer than 7 entries)
+- [ ] Enter weights with missed days; confirm the 7-entry average and "yesterday's" 7-entry average use the latest seven weigh-ins on or before each respective date, including correct behavior when fewer than seven entries exist
 - [ ] Toggle "Include calories" off, copy a day with meals, confirm pasted JSON omits `calories` fields entirely; toggle on and confirm calories reappear where present
 - [ ] Sign in on a second device/browser profile and confirm the "include calories" toggle reflects the last value saved
 - [ ] Test on an actual mobile phone browser (or device emulation) for layout/tap target sanity
@@ -129,5 +129,5 @@ Do not add service-account JSON, Admin SDK credentials, OAuth client secrets, or
 
 - No offline support/service worker (not requested)
 - No multi-user sharing (each Google account only sees its own data)
-- Rolling weight averages are computed client-side on read, not pre-aggregated/cached server-side
+- Rolling weight averages use the latest seven weigh-ins on or before each date and are computed client-side on read, not pre-aggregated/cached server-side
 - Copy-as-JSON always covers the currently viewed day only; no date-range export
