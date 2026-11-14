@@ -48,6 +48,9 @@ export async function saveDay(uid, dateString, dayData) {
 			if (Number.isFinite(row.calories)) {
 				savedRow.calories = row.calories;
 			}
+			if (Number.isFinite(row.kilojoules)) {
+				savedRow.kilojoules = row.kilojoules;
+			}
 			return savedRow;
 		})
 	}));

@@ -214,9 +214,18 @@ function formatChartDate(dateString) {
 }
 
 function getCalories(meals) {
-  return meals.reduce((total, meal) => (
-    total + meal.rows.reduce((mealTotal, row) => mealTotal + (Number(row.calories) || 0), 0)
+  const calories = meals.reduce((total, meal) => (
+    total + meal.rows.reduce((mealTotal, row) => {
+      if (Number.isFinite(row.calories)) {
+        return mealTotal + row.calories;
+      }
+      if (Number.isFinite(row.kilojoules)) {
+        return mealTotal + row.kilojoules / 4.184;
+      }
+      return mealTotal;
+    }, 0)
   ), 0);
+  return Math.round(calories);
 }
 
 function renderMeals(meals) {
@@ -240,8 +249,10 @@ function renderMeals(meals) {
 
     meal.rows.forEach((row) => {
       const item = document.createElement("li");
-      const calories = row.calories !== undefined ? ` ${row.calories} cal` : "";
-      item.textContent = `${row.item}${calories}`;
+      const energy = Number.isFinite(row.calories)
+        ? ` ${row.calories} cal`
+        : Number.isFinite(row.kilojoules) ? ` ${row.kilojoules} kJ` : "";
+      item.textContent = `${row.item}${energy}`;
       rows.append(item);
     });
 
@@ -265,8 +276,11 @@ function addEntryRow(row = {}, isFirstRow = false) {
   const rowElement = document.createElement("div");
   const itemLabel = document.createElement("label");
   const itemInput = document.createElement("input");
-  const caloriesLabel = document.createElement("label");
-  const caloriesInput = document.createElement("input");
+  const energyLabel = document.createElement("label");
+  const energyLabelText = document.createElement("span");
+  const energyInput = document.createElement("input");
+  const energyUnitSelect = document.createElement("select");
+  const energyUnitGroup = document.createElement("div");
   let removeRowButton;
 
   rowElement.className = "entry-row";
@@ -279,16 +293,27 @@ function addEntryRow(row = {}, isFirstRow = false) {
   itemInput.value = row.item ?? "";
   itemLabel.append(itemInput);
 
-  caloriesLabel.className = "entry-field";
-  caloriesLabel.textContent = "Calories";
-  caloriesInput.name = "calories";
-  caloriesInput.type = "number";
-  caloriesInput.inputMode = "numeric";
-  caloriesInput.min = "0";
-  caloriesInput.step = "1";
-  caloriesInput.placeholder = "Optional";
-  caloriesInput.value = row.calories ?? "";
-  caloriesLabel.append(caloriesInput);
+  energyLabel.className = "entry-field";
+  energyLabelText.className = "energy-label";
+  energyLabelText.textContent = "Energy";
+  energyInput.name = "energy";
+  energyInput.type = "number";
+  energyInput.inputMode = "decimal";
+  energyInput.min = "0";
+  energyInput.step = "any";
+  energyInput.placeholder = "Optional";
+  energyInput.setAttribute("aria-label", "Energy value");
+  energyUnitSelect.name = "energyUnit";
+  energyUnitSelect.setAttribute("aria-label", "Energy unit");
+  energyUnitSelect.append(
+    new Option("cal", "calories"),
+    new Option("kJ", "kilojoules")
+  );
+  energyUnitSelect.value = Number.isFinite(row.kilojoules) ? "kilojoules" : "calories";
+  energyInput.value = row.kilojoules ?? row.calories ?? "";
+  energyUnitGroup.className = "energy-input-group";
+  energyUnitGroup.append(energyInput, energyUnitSelect);
+  energyLabel.append(energyLabelText, energyUnitGroup);
 
   if (isFirstRow) {
     const timeLabel = document.createElement("label");
@@ -312,7 +337,7 @@ function addEntryRow(row = {}, isFirstRow = false) {
     removeRowButton.addEventListener("click", () => rowElement.remove());
   }
 
-  rowElement.append(itemLabel, caloriesLabel);
+  rowElement.append(itemLabel, energyLabel);
   if (removeRowButton) {
     rowElement.append(removeRowButton);
   }
@@ -350,10 +375,11 @@ function getMealFromForm() {
   const rows = [...entryRows.querySelectorAll(".entry-row")]
     .map((row) => {
       const item = row.querySelector("input[name='item']").value.trim();
-      const calorieInput = row.querySelector("input[name='calories']").value;
+      const energyInput = row.querySelector("input[name='energy']").value;
+      const energyUnit = row.querySelector("select[name='energyUnit']").value;
       const mealRow = { item };
-      if (calorieInput !== "") {
-        mealRow.calories = Number(calorieInput);
+      if (energyInput !== "") {
+        mealRow[energyUnit] = Number(energyInput);
       }
       return mealRow;
     })
@@ -363,12 +389,18 @@ function getMealFromForm() {
     return null;
   }
 
-  if (rows.some((row) => row.calories !== undefined && !Number.isFinite(row.calories))) {
-    return "Calories must be a valid number.";
+  if (rows.some((row) => (
+    row.calories !== undefined && !Number.isFinite(row.calories)
+    || row.kilojoules !== undefined && !Number.isFinite(row.kilojoules)
+  ))) {
+    return "Energy must be a valid number.";
   }
 
-  if (rows.some((row) => row.calories !== undefined && row.calories < 0)) {
-    return "Calories cannot be negative.";
+  if (rows.some((row) => (
+    row.calories !== undefined && row.calories < 0
+    || row.kilojoules !== undefined && row.kilojoules < 0
+  ))) {
+    return "Energy cannot be negative.";
   }
 
   return {
@@ -625,6 +657,9 @@ copyButton.addEventListener("click", async () => {
       const copiedRow = { item: row.item };
       if (state.includeCaloriesInCopy && row.calories !== undefined) {
         copiedRow.calories = row.calories;
+      }
+      if (state.includeCaloriesInCopy && row.kilojoules !== undefined) {
+        copiedRow.kilojoules = row.kilojoules;
       }
       return copiedRow;
     })

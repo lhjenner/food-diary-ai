@@ -28,6 +28,7 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
         "time": "08:30",
         "rows": [
           { "item": "Oatmeal", "calories": 300 },
+          { "item": "Juice", "kilojoules": 420 },
           { "item": "Coffee", "calories": 50 }
         ]
       }
@@ -36,8 +37,9 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
   ```
 - Meal display title ("Meal 1", "Meal 2", ...) is derived from array index, not stored.
 - Weight values are recorded and displayed in kilograms.
+- Each meal item can independently record energy in calories or kilojoules; stored/copied rows use `calories` or `kilojoules` accordingly. Running calorie totals and calorie graphs convert kilojoules using 1 kcal = 4.184 kJ.
 - Rolling 7-entry weight averages (the current average and the average ending the previous day) are derived client-side from the latest weigh-ins on or before each date; missed days do not reduce the sample size. The averages are not stored.
-- User settings doc: `users/{uid}/meta/settings` — `{ "includeCaloriesInCopy": true }` (defaults to `true` when absent); persists the "include calories" toggle for the Copy-as-JSON feature across devices.
+- User settings doc: `users/{uid}/meta/settings` — `{ "includeCaloriesInCopy": true }` (defaults to `true` when absent); persists the "include energy" toggle for the Copy-as-JSON feature across devices.
 - Security rules: only `request.auth.uid` matching the `{uid}` path segment can read/write, covering both the `days` docs and the `meta/settings` doc.
 
 ## Implementation plan
@@ -62,11 +64,11 @@ This README doubles as the implementation plan/checklist. Update the checkboxes 
 - [x] Running calorie total display, recalculated whenever the in-memory meal model changes
 - [x] Container area rendering each meal as a card titled "Meal N" with its rows (time, item(s), calories), plus an empty state
 - [x] "Add Entry" button, mobile-friendly placement; its entry form arrives in Phase 3
-- [x] "Copy Day as JSON" button with an adjacent "Include calories" toggle near the running calorie total; copying and preference persistence arrive in Phase 4
+- [x] "Copy Day as JSON" button with an adjacent "Include energy" toggle near the running calorie total; copying and preference persistence arrive in Phase 4
 
 ### Phase 3 — Add/Edit Entry modal (depends on Phase 2)
-- [x] Row-based form: each row = time, item, calories (time/calories optional)
-- [x] First row sets the time; "Add another item" adds more rows that reuse that time, only needing item + calories
+- [x] Row-based form: each row = time, item, optional energy value in calories or kilojoules
+- [x] First row sets the time; "Add another item" adds more rows that reuse that time, only needing item + energy
 - [x] Save validates minimal input and closes the modal
 - [x] On save (new entry): append meal object `{ time, rows }` to the selected day's in-memory `meals` array and re-render; Firestore persistence is Phase 4
 - [x] Reuse the modal for editing: "Edit" control on each meal card opens it pre-filled; Save updates in place
@@ -111,14 +113,14 @@ For HTML/CSS/JavaScript changes, run `firebase deploy --only hosting` after merg
 
 ## Verification checklist
 
-- [ ] Sign in with Google, add a meal with 2 rows (shared time); confirm it renders as "Meal 1" with both rows and correct calorie sum
+- [ ] Sign in with Google, add a meal with rows in both calories and kJ (shared time); confirm it renders as "Meal 1" with each unit shown and the converted calorie sum
 - [ ] Navigate to a past date via the date picker; confirm empty state, add data, navigate back to today, confirm today's data persists separately
 - [ ] Edit and delete a meal; confirm changes persist
 - [ ] Enter/update/clear weight for a day; reload page; confirm it persisted
 - [ ] Open graph, toggle Weight/Calories; confirm the line chart reflects entered data across multiple days
 - [ ] Enter weights with missed days; confirm the 7-entry average and "yesterday's" 7-entry average use the latest seven weigh-ins on or before each respective date, including correct behavior when fewer than seven entries exist
-- [ ] Toggle "Include calories" off, copy a day with meals, confirm pasted JSON omits `calories` fields entirely; toggle on and confirm calories reappear where present
-- [ ] Sign in on a second device/browser profile and confirm the "include calories" toggle reflects the last value saved
+- [ ] Toggle "Include energy" off, copy a day with meals, confirm pasted JSON omits both `calories` and `kilojoules` fields; toggle on and confirm values and units reappear
+- [ ] Sign in on a second device/browser profile and confirm the "include energy" toggle reflects the last value saved
 - [ ] Test on an actual mobile phone browser (or device emulation) for layout/tap target sanity
 - [ ] Deploy check: visit Firebase Hosting URL from phone, confirm full flow works end-to-end
 
