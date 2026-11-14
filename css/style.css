@@ -106,7 +106,10 @@ h1 {
 }
 
 input[type="date"],
-input[type="number"] {
+input[type="number"],
+input[type="text"],
+input[type="time"],
+select {
   width: 100%;
   min-height: 44px;
   border: 1px solid #b9c1ae;
@@ -445,6 +448,23 @@ h3 {
   min-width: 0;
 }
 
+.energy-input-group {
+  display: flex;
+  gap: 4px;
+}
+
+.energy-input-group input {
+  width: 0;
+  flex: 1;
+}
+
+.energy-input-group select {
+  width: 54px;
+  flex: 0 0 54px;
+  padding: 8px 4px;
+  font-size: 0.78rem;
+}
+
 .remove-row-button {
   top: auto;
   right: 0;
@@ -636,19 +656,25 @@ h3 {
     padding: 24px;
   }
 
-  .entry-row,
-  .entry-row-first {
-    grid-template-columns: minmax(0, 1fr) 112px;
+  .entry-row {
+    grid-template-columns: minmax(0, 1fr) 32px;
     padding-right: 0;
   }
 
-  .entry-row-first .entry-field:first-child {
+  .entry-row-first {
+    grid-template-columns: minmax(0, 1fr);
+    padding-right: 0;
+  }
+
+  .entry-row:not(.entry-row-first) .entry-field:nth-child(2) {
     grid-column: 1 / -1;
   }
 
   .remove-row-button {
     position: static;
-    align-self: end;
+    align-self: center;
     grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
   }
 }
